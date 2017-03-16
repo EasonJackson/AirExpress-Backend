@@ -93,6 +93,7 @@ public class ExampleServer {
     }
 
     //SortFlight
+    /*
     public static class SortFlight implements RequestHandler {
         public String[] handledRequests() {
             return new String[] {
@@ -110,6 +111,7 @@ public class ExampleServer {
             }
         }
     }
+    */
 
     //ReserveTrip
     public static class ReserveTrip implements RequestHandler {
@@ -122,7 +124,7 @@ public class ExampleServer {
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
             if (req.getMethod().equals("reserve")) {
                 List params = (List) req.getParams();
-                List<Flight> reservation = (List<Flight>) params.get(0);
+                Trip reservation = (Trip) params.get(0);
                 reservation.addAll((List<Flight>) params.get(1));
                 String typeOfSeat = (String) params.get(2);
                 return Operation.reserveTrip(reservation, typeOfSeat, req.getID());
@@ -132,6 +134,7 @@ public class ExampleServer {
         }
     }
 
+    /*
     public static class GetDetails implements RequestHandler {
         public String[] handledRequests() {
             return new String[]{
@@ -139,7 +142,7 @@ public class ExampleServer {
             };
         }
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            if(req.getMethod().equals("reserve")) {
+            if(req.getMethod().equals("getFlightDetails")) {
                 List params = (List) req.getParams();
                 String flightNumber = (String) params.get(0);
                 return Operation.getFlightDetails(flightNumber, req.getID());
@@ -148,6 +151,7 @@ public class ExampleServer {
             }
         }
     }
+    */
 
     public static void main(String[] args) throws IOException{
 
@@ -156,8 +160,9 @@ public class ExampleServer {
         dispatcher.register(new EchoHandler());
         dispatcher.register(new DateTimeHandler());
         dispatcher.register(new SearchFlight());
-        dispatcher.register(new SortFlight());
+        //dispatcher.register(new SortFlight());
         dispatcher.register(new ReserveTrip());
+        //dispatcher.register(new GetDetails());
 
         /*
         List echoParam = new LinkedList();

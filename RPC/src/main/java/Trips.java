@@ -13,19 +13,17 @@ public class Trips extends ArrayList<Trip> {
         return false;
     }
 
-    public void sortByPrice() {
-        Collections.sort(this, new PriceComparator());
-    }
-
-    public void sortByDuration() {
-        Collections.sort(this, new DurationComparator());
-    }
-
     public String toJSONText() {
         String result = null;
         Iterator<Trip> it = this.iterator();
+        result += "{";
         while(it.hasNext()) {
             Trip fts = it.next();
+            result += "\"Trip\": [{\"id\": " + "\"" + fts.getTripID() + "\","
+                        + fts.toJSONText() + "}]";
+            if(it.hasNext()) {
+                result += ",";
+            }
         }
         return result;
     }

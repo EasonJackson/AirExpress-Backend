@@ -29,40 +29,15 @@ public class ExampleClient {
     }
 
     public JSONRPC2Response searchFlight(String method, List<Object> params) {
-        DateFormat df = DateFormat.getDateInstance();
-        String date = df.format(new java.util.Date());
-        int requestID = date.hashCode();
+        int requestID = genRequestID();
         JSONRPC2Request req = new JSONRPC2Request(method, params, requestID);
         System.out.println(req);
 
         return sendRequest(req);
     }
 
-    public JSONRPC2Response sortByPrice(String method) {
-        DateFormat df = DateFormat.getDateInstance();
-        String date = df.format(new java.util.Date());
-        int requestID = date.hashCode();
-        JSONRPC2Request req = new JSONRPC2Request(method, requestID);
-        System.out.println(req);
-
-        return sendRequest(req);
-    }
-
-
-    public JSONRPC2Response sortByDuration(String method) {
-        DateFormat df = DateFormat.getDateInstance();
-        String date = df.format(new java.util.Date());
-        int requestID = date.hashCode();
-        JSONRPC2Request req = new JSONRPC2Request(method, requestID);
-        System.out.println(req);
-
-        return sendRequest(req);
-    }
-
     public JSONRPC2Response reserveFlight(String method, List<Object> params) {
-        DateFormat df = DateFormat.getDateInstance();
-        String date = df.format(new java.util.Date());
-        int requestID = date.hashCode();
+        int requestID = genRequestID();
         JSONRPC2Request req = new JSONRPC2Request(method, params, requestID);
         System.out.println(req);
 
@@ -83,5 +58,11 @@ public class ExampleClient {
             System.out.println(resp.getError().getMessage());
         }
         return resp;
+    }
+
+    public static int genRequestID() {
+        DateFormat df = DateFormat.getDateInstance();
+        String date = df.format(new java.util.Date());
+        return date.hashCode();
     }
 }
