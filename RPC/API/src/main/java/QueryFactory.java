@@ -24,6 +24,16 @@ public class QueryFactory {
 		query = query + "&day=" + day;
 		return query;
 	}
+
+	public static String getFlightArriving(String team, String airportCode, String day) {
+		String query = "?team=" + team;
+		query = query + "&action=list";
+		query = query + "&list_type=arriving";
+		query = query + "&airport=" + airportCode;
+		query = query + "&day=" + day;
+		return query;
+	}
+
 	public static String lock (String ticketAgency) {
 		return "team=" + ticketAgency + "&action=lockDB";
 	}

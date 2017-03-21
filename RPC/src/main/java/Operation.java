@@ -57,6 +57,7 @@ public class Operation {
     private static String searchHelper(String depAIR, String arrAIR, String depTime) {
 
         String flight_leg1;
+        String flight_leg3;
 
         HashMap<Flight, Flights> search_two = new HashMap<Flight, Flights>();
         HashMap<Flights, Flights> search_three = new HashMap<Flights, Flights>();
@@ -64,11 +65,22 @@ public class Operation {
         listOfTrips.clear();
         tripID = 0;
         //Search the DB: the real logic part
-        flight_leg1 = sys.getFlights(TEAM_DB, depAIR, depTime);
+
+        //First leg
+        flight_leg1 = sys.getFlightsDeparting(TEAM_DB, depAIR, depTime);
         Flights search_one = new Flights();
         search_one.addAll(flight_leg1);
 
-        if(search_one.isEmpty()) {
+        //Third leg
+        flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, depTime);
+        Flights search_three = new Flights();
+        seach_three.addAll(flight_leg3);
+        flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, getNextDay(depTime));
+        Flights seach_three_2 = new Flights();
+        search_three_2.addAll(search_three_2);
+        search_three.addAll(search_three_2);
+
+        if(search_one.isEmpty() || search_three.isEmpty()) {
             return null;
         }
 
@@ -98,45 +110,29 @@ public class Operation {
         for(Flight f : search_two.keySet()) {
             Flights flights = search_two.get(f);
             for(Flight f_s : flights) {
-                if(f_s.isValid() && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
+                if(f_s.isValid()) {
                     Trip li = new Trip();
                     li.setTripID(tripID);
                     li.add(f);
                     li.add(f_s);
-                    tripID ++;
-                    if (f_s.getmCodeArrival().equals(arrAIR)) {
+                    
+                    if (f_s.getmCodeArrival().equals(arrAIR) && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
                         // For 1 leg flight it will be added to the result listOfTrips when the second flight has the arrAIR code the same as the destination
                         listOfTrips.append(li);
+                        tripID ++;
                     } else {
-                        String arrival = toTime(f_s.getmTimeArrival());
-                        String arr_next = getNextDay(arrival);
-                        Flights search_third = new Flights();
-                        Flights search_third_2 = new Flights();
-                        search_third.addAll(sys.getFlights(TEAM_DB, f_s.getmCodeArrival(), arrival));
-                        search_third_2.addAll(sys.getFlights(TEAM_DB, f_s.getmCodeArrival(), arr_next));
-                        search_third.addAll(search_third_2);
-                        search_three.put(li, search_third);
+                        for(Flight f_t : search_three) {
+                            if(g_s.getmCodeArrival().equals(f_t.getmCodeDepart) && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
+                                li.add(f_t);
+                                listOfTrips.append(li);
+                                tripID ++;
+                            }
+                        }
                     }
                 }
             }
         }
 
-        for(Flights f : search_three.keySet()) {
-            Flights flights = search_three.get(f);
-            Flight f_s = flights.get(1);
-            for(Flight f_t : flights) {
-                if (f_t.isValid()
-                        && f_t.getmCodeArrival().equals(arrAIR)
-                        && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
-                    Trip fin = new Trip();
-                    fin.setTripID(tripID);
-                    fin.addAll(flights);
-                    fin.add(f_t);
-                    listOfTrips.append(fin);
-                    tripID++;
-                }
-            }
-        }
 
         if(listOfTrips.isEmpty()) {
             return null;
