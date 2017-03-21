@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="c2b93a3f-0974-4d58-b880-558188f188a0" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RPC/src/main/java/ExampleServer.java" afterPath="$PROJECT_DIR$/RPC/src/main/java/ExampleServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RPC/src/main/java/Operation.java" afterPath="$PROJECT_DIR$/RPC/src/main/java/Operation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RPC/src/main/java/Trip.java" afterPath="$PROJECT_DIR$/RPC/src/main/java/Trip.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RPC/src/main/java/Trips.java" afterPath="$PROJECT_DIR$/RPC/src/main/java/Trips.java" />
-    </list>
+    <list default="true" id="c2b93a3f-0974-4d58-b880-558188f188a0" name="Default" comment="" />
     <ignored path="FlightSys.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
