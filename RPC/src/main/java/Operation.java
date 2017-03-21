@@ -1,4 +1,6 @@
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
+import com.thetransactioncompany.jsonrpc2.JSONRPC2Parser;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 import java.util.Date;
@@ -141,49 +143,24 @@ public class Operation {
         return listOfTrips.toJSONText();
     }
 
-    /*
-    public static JSONRPC2Response sortByPrice(Object id) {
-        String query = null;
-        listOfTrips.sortByPrice();
-        listOfTrips_return.sortByPrice();
-        query = listOfTrips.toJSONText() + "\n" + listOfTrips_return.toJSONText();//Need to design the query
-        return new JSONRPC2Response(query, id);
-    }
-
-    public static JSONRPC2Response sortByDuration(Object id) {
-        String query = null;
-        listOfTrips.sortByDuration();
-        listOfTrips_return.sortByDuration();
-        query = listOfTrips.toJSONText() + "\n" + listOfTrips_return.toJSONText(); //Need to design the query
-        return new JSONRPC2Response(query, id);
-    }
-
-    */
-
-    /*
-    public static JSONRPC2Response getFlightDetails(String tripNumber,
-                                                    Object id) {
-        String query = null;
-        Iterator<Trip> it = listOfTrips.iterator();
-
-        while(it.hasNext()) {
-            if(Integer.getInteger(tripNumber) == it.next().getTripID()) {
-                query += it.next().toJSONText();
-                break;
-            }
+    // Test case for process
+    public static JSONRPC2Response processSimple(String depAIR,
+                                                 String arrAIR,
+                                                 String depTime,
+                                                 String retTime,
+                                                 Object id) {
+        String xmlFlights = sys.getFlightsDeparting(TEAM_DB, depAIR, depTime);
+        Trip f = new Trip();
+        f.addAll(xmlFlights);
+        Trips t = new Trips();
+        t.add(f);
+        try {
+            return JSONRPC2Response.parse("{\"result\":" + t.toJSONText() + ",\"id\":\"req-002\",\"jsonrpc\":\"2.0\"}");
+        } catch (JSONRPC2ParseException e) {
+            e.printStackTrace();
+            return new JSONRPC2Response(t.toJSONText(), id);
         }
-
-        Iterator<Trip> itr = listOfTrips_return.iterator();
-
-        while(itr.hasNext()) {
-            if(Integer.getInteger((tripNumber)) == it.next().getTripID()) {
-                query += it.next().toJSONText();
-                break;
-            }
-        }
-
-        return new JSONRPC2Response(query, id);
-    } */
+    }
 
     public static JSONRPC2Response reserveTrip(Trip reservation,
                                                String typeOfSeat,

@@ -21,11 +21,6 @@ import java.text.*;
 
 public class ExampleServer {
     private static final int SERVER_PORT = 8080;
-
-    //private static ServerInterface sys = new ServerInterface();
-    //private static final HashMap<String, String> airport = xmlParser(sys.getAirports(TEAM_DB));
-
-
     //Test echo method
     public static class EchoHandler implements RequestHandler {
         public String[] handledRequests() {
@@ -46,6 +41,7 @@ public class ExampleServer {
         }
     }
 
+    //Test time and date method
     public static class DateTimeHandler implements RequestHandler {
         public String[] handledRequests() {
             return new String[]{
@@ -69,6 +65,29 @@ public class ExampleServer {
         }
     }
 
+    //Test db query for search method
+    public static class SearchFlightTest implements RequestHandler {
+        public String[] handledRequests() {
+            return new String[] {
+                    "searchFlightTest"
+            };
+        }
+
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            if (req.getMethod().equals("searchFlightTest")) {
+                List params = (List) req.getParams();
+                Object depAIR = params.get(0);
+                Object arrAIR = params.get(1);
+                Object depTime = params.get(2);
+                Object retTime = params.get(3);
+                return Operation.processSimple((String)depAIR, (String)arrAIR, (String)depTime, (String)retTime, req.getID());
+
+            } else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    }
+
     //SearchFlight request handler
     public static class SearchFlight implements RequestHandler {
         public String[] handledRequests() {
@@ -81,37 +100,16 @@ public class ExampleServer {
             if(req.getMethod().equals("searchFlight")) {
                 List params = (List) req.getParams();
                 String depAIR = (String) params.get(0);
-                String arrAIP = (String) params.get(1);
+                String arrAIR = (String) params.get(1);
                 String depTime = (String) params.get(2);
                 String retTime = (String) params.get(3);
 
-                return Operation.process(depAIR, arrAIP, depTime, retTime, req.getID());
+                return Operation.process(depAIR, arrAIR, depTime, retTime, req.getID());
             } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
             }
         }
     }
-
-    //SortFlight
-    /*
-    public static class SortFlight implements RequestHandler {
-        public String[] handledRequests() {
-            return new String[] {
-                    "sortByPrice", "sortByDuration"
-            };
-        }
-
-        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            if(req.getMethod().equals("sortByPrice")) {
-                return Operation.sortByPrice(req.getID());
-            } else if(req.getMethod().equals("sortByDuration")) {
-                return Operation.sortByDuration(req.getID());
-            } else {
-                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
-            }
-        }
-    }
-    */
 
     //ReserveTrip
     public static class ReserveTrip implements RequestHandler {
@@ -134,25 +132,6 @@ public class ExampleServer {
         }
     }
 
-    /*
-    public static class GetDetails implements RequestHandler {
-        public String[] handledRequests() {
-            return new String[]{
-                    "getFlightDetails"
-            };
-        }
-        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            if(req.getMethod().equals("getFlightDetails")) {
-                List params = (List) req.getParams();
-                String flightNumber = (String) params.get(0);
-                return Operation.getFlightDetails(flightNumber, req.getID());
-            } else {
-                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
-            }
-        }
-    }
-    */
-
     public static void main(String[] args) throws IOException{
 
         Dispatcher dispatcher = new Dispatcher();
@@ -160,17 +139,16 @@ public class ExampleServer {
         dispatcher.register(new EchoHandler());
         dispatcher.register(new DateTimeHandler());
         dispatcher.register(new SearchFlight());
-        //dispatcher.register(new SortFlight());
         dispatcher.register(new ReserveTrip());
-        //dispatcher.register(new GetDetails());
+        dispatcher.register(new SearchFlightTest());
 
-        /*
         List echoParam = new LinkedList();
         echoParam.add("Hello world");
-
+        echoParam.add("SHit");
         JSONRPC2Request req = new JSONRPC2Request("echo", echoParam, "req-id-01");
         System.out.println("Request: \n" + req);
 
+        /*
         JSONRPC2Response resp = dispatcher.process(req, null);
         System.out.println("Response: \n" + resp);
 
@@ -191,12 +169,6 @@ public class ExampleServer {
         server.createContext("/", new MyHandler(dispatcher));
         server.setExecutor(null);
         server.start();
-
-
-        //JSONRPC2Response resp = dispatcher.process(jsonReq, null);
-        //System.out.println("Request: \n" + jsonReq);
-        //System.out.println("Response: \n" + resp);
-
     }
 
 

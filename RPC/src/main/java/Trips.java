@@ -14,17 +14,18 @@ public class Trips extends ArrayList<Trip> {
     }
 
     public String toJSONText() {
-        String result = null;
+        String result = "";
         Iterator<Trip> it = this.iterator();
-        result += "{";
+        result += "[";
         while(it.hasNext()) {
             Trip fts = it.next();
-            result += "\"Trip\": [{\"id\": " + "\"" + fts.getTripID() + "\","
-                        + fts.toJSONText() + "}]";
+            result += "{\"tripid\": " + fts.getTripID() + ","
+                        + fts.toJSONText() + "}";
             if(it.hasNext()) {
                 result += ",";
             }
         }
+        result += "]";
         return result;
     }
 

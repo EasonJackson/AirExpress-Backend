@@ -19,31 +19,30 @@ public class Trip extends Flights{
     }
 
     public String toJSONText() {
-        String result = null;
+        String result;
         result =  "\"value\"" + ": " + "[";
         Iterator<Flight> it = this.iterator();
         int count = 0;
         while(it.hasNext()) {
             Flight fts = it.next();
-            result += "{\"leg\": {";
-            result += "\"id\": "                + "\""  + Integer.toString(count)   + "\"" + ",";
-            result += "\"Airplane\": "          + "\""  + fts.getmAirplane()        + "\"" + ",";
-            result += "\"FlightTime\": "        + "\""  + fts.getmFlightTime()      + "\"" + ",";
-            result += "\"Number\": "            + "\""  + fts.getmNumber()          + "\"" + ",";
-            result += "\"CodeDepart\": "        + "\""  + fts.getmCodeDepart()      + "\"" + ",";
-            result += "\"TimeDepart\": "        + "\""  + fts.getmTimeDepart()      + "\"" + ",";
-            result += "\"CodeArrival\": "       + "\""  + fts.getmCodeArrival()     + "\"" + ",";
-            result += "\"TimeArrival\": "       + "\""  + fts.getmTimeArrival()     + "\"" + ",";
-            result += "\"PriceFirstclass\": "   + "\""  + fts.getmPriceFirstclass() + "\"" + ",";
-            result += "\"SeatsFirstclass\": "   + "\""  + fts.getmSeatsFirstclass() + "\"" + ",";
-            result += "\"PriceCoach\": "        + "\""  + fts.getmPriceCoach()      + "\"" + ",";
-            result += "\"SeatsCoach\": "        + "\""  + fts.getmSeatsCoach()      + "\"" + "}";
-            result += "}";
+            result += "{\"id\": "                  + count                      + ",";
+            result += "\"Airplane\":  \""          + fts.getmAirplane()         + "\",";
+            result += "\"FlightTime\": \""         + fts.getmFlightTime()       + "\",";
+            result += "\"Number\": "               + fts.getmNumber()           + ",";
+            result += "\"CodeDepart\": \""         + fts.getmCodeDepart()       + "\",";
+            result += "\"TimeDepart\": \""         + fts.getmTimeDepart()       + "\",";
+            result += "\"CodeArrival\": \""        + fts.getmCodeArrival()      + "\",";
+            result += "\"TimeArrival\": \""        + fts.getmTimeArrival()      + "\",";
+            result += "\"PriceFirstclass\": \""    + fts.getmPriceFirstclass()  + "\",";
+            result += "\"SeatsFirstclass\": "      + fts.getmSeatsFirstclass()  + ",";
+            result += "\"PriceCoach\": \""         + fts.getmPriceCoach()       + "\",";
+            result += "\"SeatsCoach\": "           + fts.getmSeatsCoach()       + "}";
             if(it.hasNext()) {
                 result += ",";
             }
             count ++;
         }
+        result += "]";
         return result;
     }
 }
