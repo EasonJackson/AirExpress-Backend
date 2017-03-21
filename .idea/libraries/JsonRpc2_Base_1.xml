@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="JsonRpc2-Base-1">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31/javadoc" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31" />
+      <root url="file://$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31/src" />
+      <root url="file://$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31/test" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31" recursive="false" />
+  </library>
+</component>
