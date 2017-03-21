@@ -14,10 +14,6 @@ public class Trip extends Flights{
 
     private int tripID;
 
-    public int compareTo(Object o) {
-        return 0;
-    }
-
     public String toJSONText() {
         String result;
         result =  "\"value\"" + ": " + "[";

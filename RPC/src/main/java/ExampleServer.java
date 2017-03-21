@@ -169,6 +169,7 @@ public class ExampleServer {
         server.createContext("/", new MyHandler(dispatcher));
         server.setExecutor(null);
         server.start();
+        System.out.println("RPC request dispatch server is running. Local port: " + SERVER_PORT);
     }
 
 
@@ -178,7 +179,7 @@ public class ExampleServer {
         private JSONRPC2Request jsonReq;
         private JSONRPC2Response jsonResp;
 
-        public MyHandler(Dispatcher dispatcher) {
+        MyHandler(Dispatcher dispatcher) {
             this.dispatcher = dispatcher;
         }
 
@@ -219,11 +220,5 @@ public class ExampleServer {
             os.close();
             //String query = requestURI.getRawQuery();
         }
-
-    }
-
-    public static HashMap<String, String> xmlParser(String pattern) {
-        HashMap<String, String> result = new HashMap<String, String>();
-        return result;
     }
 }

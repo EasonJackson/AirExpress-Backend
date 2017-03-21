@@ -1,6 +1,5 @@
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
-import com.thetransactioncompany.jsonrpc2.JSONRPC2Parser;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 import java.util.Date;
@@ -79,7 +78,7 @@ public class Operation {
         search_three_1.addAll(flight_leg3);
         flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, getNextDay(depTime));
         Flights search_three_2 = new Flights();
-        search_three_2.addAll(search_three_2);
+        search_three_2.addAll(flight_leg3);
         search_three_1.addAll(search_three_2);
 
         if(search_one.isEmpty() || search_three.isEmpty()) {
@@ -113,18 +112,24 @@ public class Operation {
             Flights flights = search_two.get(f);
             for(Flight f_s : flights) {
                 if(f_s.isValid()) {
-                    Trip li = new Trip();
-                    li.setTripID(tripID);
-                    li.add(f);
-                    li.add(f_s);
-                    
-                    if (f_s.getmCodeArrival().equals(arrAIR) && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
+                    if (f_s.getmCodeArrival().equals(arrAIR)
+                            && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
                         // For 1 leg flight it will be added to the result listOfTrips when the second flight has the arrAIR code the same as the destination
+                        Trip li = new Trip();
+                        li.setTripID(tripID);
+                        li.add(f);
+                        li.add(f_s);
                         listOfTrips.append(li);
                         tripID ++;
                     } else {
                         for(Flight f_t : search_three_1) {
-                            if(f_s.getmCodeArrival().equals(f_t.getmCodeDepart()) && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
+                            // For 2 legs flight it will be added to the result of the f_s.ariAIR == f_t.depAIR and layover is reasonable
+                            if(f_s.getmCodeArrival().equals(f_t.getmCodeDepart())
+                                    && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
+                                Trip li = new Trip();
+                                li.setTripID(tripID);
+                                li.add(f);
+                                li.add(f_s);
                                 li.add(f_t);
                                 listOfTrips.append(li);
                                 tripID ++;
@@ -143,7 +148,7 @@ public class Operation {
         return listOfTrips.toJSONText();
     }
 
-    // Test case for process
+    // Test case for process: a simply method for receiving query from db
     public static JSONRPC2Response processSimple(String depAIR,
                                                  String arrAIR,
                                                  String depTime,
@@ -155,7 +160,7 @@ public class Operation {
         Trips t = new Trips();
         t.add(f);
         try {
-            return JSONRPC2Response.parse("{\"result\":" + t.toJSONText() + ",\"id\":\"req-002\",\"jsonrpc\":\"2.0\"}");
+            return JSONRPC2Response.parse("{\"result\":" + t.toJSONText() + ",\"id\": " +id +",\"jsonrpc\":\"2.0\"}");
         } catch (JSONRPC2ParseException e) {
             e.printStackTrace();
             return new JSONRPC2Response(t.toJSONText(), id);
@@ -165,12 +170,26 @@ public class Operation {
     public static JSONRPC2Response reserveTrip(Trip reservation,
                                                String typeOfSeat,
                                                Object id) {
-        String query = "Seat Reserved Successfully";
+
+
+        String query = reserveHelper(reservation, typeOfSeat, id);
+
+        try {
+            return JSONRPC2Response.parse("{\"result\":" + query + ",\"id\": " + id + ",\"jsonrpc\":\"2.0\"}");
+        } catch (JSONRPC2ParseException e) {
+            e.printStackTrace();
+        }
+        return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, id);
+    }
+
+    private static String reserveHelper(Trip reservation,
+                                        String typeOfSeat,
+                                        Object id) {
 
         for(Flight flight : reservation) {
             String xmlReservation = "<Flights>"
-                    + "<Flight number=\"" + flight.getmNumber() + "\" seating=\"Coach\"/>"
-                    + "</Flights>";
+                    + "<Flight number=\"" + flight.getmNumber() + "\" seating=\""
+                    + typeOfSeat + "\"/>" + "</Flights>";
             sys.lock(TEAM_DB);
             sys.buyTickets(TEAM_DB, xmlReservation);
             sys.unlock(TEAM_DB);
@@ -199,15 +218,13 @@ public class Operation {
             if (seatsReservedEnd == (seatsReservedStart + 1)) {
                 continue;
             } else {
-                query = "Reservation Failed";
-                break;
+                return "Reservation Failed";
             }
         }
-
-        return new JSONRPC2Response(query, id);
+        return "Seat Reserved Successfully";
     }
 
-    public static int getSeats(Flight flight, String typeOfSeat) {
+    private static int getSeats(Flight flight, String typeOfSeat) {
         if(typeOfSeat.equals("Coach")) {
             return flight.getmSeatsCoach();
         }
