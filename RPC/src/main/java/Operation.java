@@ -73,12 +73,12 @@ public class Operation {
 
         //Third leg
         flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, depTime);
-        Flights search_three = new Flights();
-        seach_three.addAll(flight_leg3);
+        Flights search_three_1 = new Flights();
+        search_three_1.addAll(flight_leg3);
         flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, getNextDay(depTime));
-        Flights seach_three_2 = new Flights();
+        Flights search_three_2 = new Flights();
         search_three_2.addAll(search_three_2);
-        search_three.addAll(search_three_2);
+        search_three_1.addAll(search_three_2);
 
         if(search_one.isEmpty() || search_three.isEmpty()) {
             return null;
@@ -99,8 +99,8 @@ public class Operation {
                     String arr_next = getNextDay(arrival);
                     Flights search_second = new Flights();
                     Flights search_second_2 = new Flights();
-                    search_second.addAll(sys.getFlights(TEAM_DB, f.getmCodeArrival(), arrival));
-                    search_second_2.addAll(sys.getFlights(TEAM_DB, f.getmCodeArrival(), arr_next));
+                    search_second.addAll(sys.getFlightsDeparting(TEAM_DB, f.getmCodeArrival(), arrival));
+                    search_second_2.addAll(sys.getFlightsDeparting(TEAM_DB, f.getmCodeArrival(), arr_next));
                     search_second.addAll(search_second_2);
                     search_two.put(f, search_second);
                 }
@@ -121,8 +121,8 @@ public class Operation {
                         listOfTrips.append(li);
                         tripID ++;
                     } else {
-                        for(Flight f_t : search_three) {
-                            if(g_s.getmCodeArrival().equals(f_t.getmCodeDepart) && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
+                        for(Flight f_t : search_three_1) {
+                            if(f_s.getmCodeArrival().equals(f_t.getmCodeDepart()) && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
                                 li.add(f_t);
                                 listOfTrips.append(li);
                                 tripID ++;
@@ -201,7 +201,7 @@ public class Operation {
 
         // Verify the operation worked
         for(Flight flight : reservation) {
-            String xmlFlights = sys.getFlights(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeDepart());
+            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeDepart());
             check.clear();
             check.addAll(xmlFlights);
             int seatsReservedStart = getSeats(flight, typeOfSeat);

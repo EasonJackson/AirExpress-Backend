@@ -18,7 +18,7 @@ public class Driver {
 		System.out.println(xmlAirport);
 
 		// Get a sample list of flights from server
-		String xmlFlights = resSys.getFlights("WickedSmaht", "BOS", "2017_06_20");
+		String xmlFlights = resSys.getFlightsDeparting("WickedSmaht", "BOS", "2017_06_20");
 		System.out.println(xmlFlights);
 		
 		// Create the aggregate flights
@@ -49,7 +49,7 @@ public class Driver {
 		resSys.unlock("WorldPlaneInc");
 		
 		// Verify the operation worked
-		xmlFlights = resSys.getFlights("WickedSmaht", "BOS", "2017_05_10");
+		xmlFlights = resSys.getFlightsDeparting("WickedSmaht", "BOS", "2017_05_10");
 		System.out.println(xmlFlights);
 		flights.clear();
 		flights.addAll(xmlFlights);

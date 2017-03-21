@@ -25,7 +25,7 @@ public class QueryFactory {
 		return query;
 	}
 
-	public static String getFlightArriving(String team, String airportCode, String day) {
+	public static String getFlightsArriving(String team, String airportCode, String day) {
 		String query = "?team=" + team;
 		query = query + "&action=list";
 		query = query + "&list_type=arriving";
