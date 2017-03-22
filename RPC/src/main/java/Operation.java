@@ -10,7 +10,7 @@ import java.util.HashMap;
  * Created by eason on 2/26/17.
  */
 public class Operation {
-    private static ServerInterface sys = new ServerInterface();
+    private static final ServerInterface sys = new ServerInterface();
     private static final String TEAM_DB = "WickedSmaht";
     private static final double minLayover = 0.5;
     private static final double maxLayover = 3;
@@ -30,6 +30,8 @@ public class Operation {
         MonthSwitch.put("December", "12");
     }
 
+    private static final Airports AIRPORT = sys.getAirports();
+
     private static Trips listOfTrips = new Trips();
     private static Flights check = new Flights();
     private static int tripID;
@@ -42,17 +44,24 @@ public class Operation {
 
 
         // Valid input check
-        if(depAIR == null || arrAIR == null || depTime == null) {
+        if(depAIR == null || arrAIR == null || depTime == null ||
+                !AIRPORT.contains(depAIR) || !AIRPORT.contains(arrAIR)) {
             return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, id);
         }
 
+        System.out.println("Process function gets called. Working ...");
         String query = searchHelper(depAIR, arrAIR, depTime);
         String query_return = null;
         if(retTime != null) {
             query_return = searchHelper(arrAIR, depAIR, retTime);
         }
 
-        return new JSONRPC2Response(query + "\n" + query_return, id);
+        try {
+            return JSONRPC2Response.parse("{\"result\":" + "[" + query + query_return + "]"+ ",\"id\": " +id +",\"jsonrpc\":\"2.0\"}");
+        } catch (JSONRPC2ParseException e) {
+            e.printStackTrace();
+        }
+        return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, id);
     }
 
     private static String searchHelper(String depAIR, String arrAIR, String depTime) {
@@ -72,6 +81,8 @@ public class Operation {
         Flights search_one = new Flights();
         search_one.addAll(flight_leg1);
 
+        System.out.println("Leg 1 search completed. Working on next stage ...");
+
         //Third leg
         flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, depTime);
         Flights search_three_1 = new Flights();
@@ -80,6 +91,8 @@ public class Operation {
         Flights search_three_2 = new Flights();
         search_three_2.addAll(flight_leg3);
         search_three_1.addAll(search_three_2);
+
+        System.out.println("Leg 3 search completed. Working on next stage ...");
 
         if(search_one.isEmpty() || search_three.isEmpty()) {
             return null;
@@ -107,6 +120,8 @@ public class Operation {
                 }
             }
         }
+
+        System.out.println("Leg 2 search complete. Working on next stage ...");
 
         for(Flight f : search_two.keySet()) {
             Flights flights = search_two.get(f);
@@ -140,6 +155,8 @@ public class Operation {
             }
         }
 
+        System.out.println("Search completed. Returning results ...");
+
 
         if(listOfTrips.isEmpty()) {
             return null;
@@ -171,7 +188,7 @@ public class Operation {
                                                String typeOfSeat,
                                                Object id) {
 
-
+        System.out.println("reserveTrip function gets called. Working ...");
         String query = reserveHelper(reservation, typeOfSeat, id);
 
         try {
@@ -194,6 +211,8 @@ public class Operation {
             sys.buyTickets(TEAM_DB, xmlReservation);
             sys.unlock(TEAM_DB);
         }
+
+        System.out.println("Database updated. Checking the reservation information ...");
 
         // Verify the operation worked
         for(Flight flight : reservation) {
@@ -221,6 +240,8 @@ public class Operation {
                 return "Reservation Failed";
             }
         }
+
+        System.out.println("Reservation confirmed. All set.");
         return "Seat Reserved Successfully";
     }
 
