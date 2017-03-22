@@ -30,7 +30,10 @@ public class Operation {
         MonthSwitch.put("December", "12");
     }
 
-    private static final Airports AIRPORT = sys.getAirports();
+    private static final Airports AIRPORT = new Airports();
+    static {
+        AIRPORT.addAll(sys.getAirports(TEAM_DB));
+    }
 
     private static Trips listOfTrips = new Trips();
     private static Flights check = new Flights();
