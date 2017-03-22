@@ -99,12 +99,14 @@ public class ExampleServer {
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
             if(req.getMethod().equals("searchFlight")) {
                 List params = (List) req.getParams();
-                String depAIR = (String) params.get(0);
-                String arrAIR = (String) params.get(1);
-                String depTime = (String) params.get(2);
-                String retTime = (String) params.get(3);
-
-                return Operation.process(depAIR, arrAIR, depTime, retTime, req.getID());
+                Object depAIR =  params.get(0);
+                Object arrAIR =  params.get(1);
+                Object depTime = params.get(2);
+                Object retTime = null;
+                if(params.size() == 4) {
+                    retTime = params.get(3);
+                }
+                return Operation.process((String)depAIR, (String)arrAIR, (String)depTime, (String)retTime, req.getID());
             } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
             }
@@ -143,15 +145,12 @@ public class ExampleServer {
         dispatcher.register(new SearchFlightTest());
 
         List echoParam = new LinkedList();
-        echoParam.add("Hello world");
-        echoParam.add("SHit");
+        echoParam.add("Self testing query");
         JSONRPC2Request req = new JSONRPC2Request("echo", echoParam, "req-id-01");
         System.out.println("Request: \n" + req);
+        System.out.println("Test passed");
 
         /*
-        JSONRPC2Response resp = dispatcher.process(req, null);
-        System.out.println("Response: \n" + resp);
-
         req = new JSONRPC2Request("getDate", "req-id-02");
         System.out.println("Request: \n" + req);
 
@@ -173,7 +172,7 @@ public class ExampleServer {
     }
 
 
-    static class MyHandler implements HttpHandler {
+    private static class MyHandler implements HttpHandler {
 
         private Dispatcher dispatcher;
         private JSONRPC2Request jsonReq;

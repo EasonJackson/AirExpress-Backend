@@ -4,6 +4,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 
 
 /**
@@ -13,7 +14,7 @@ public class Operation {
     private static final ServerInterface sys = new ServerInterface();
     private static final String TEAM_DB = "WickedSmaht";
     private static final double minLayover = 0.5;
-    private static final double maxLayover = 3;
+    private static final double maxLayover = 4;
     private static final HashMap<String, String> MonthSwitch = new HashMap<String, String>();
     static {
         MonthSwitch.put("January", "01");
@@ -30,9 +31,14 @@ public class Operation {
         MonthSwitch.put("December", "12");
     }
 
-    private static final Airports AIRPORT = new Airports();
+    private static final HashSet<String> AIRPORT = new HashSet<String>();
+
     static {
-        AIRPORT.addAll(sys.getAirports(TEAM_DB));
+        Airports airports = new Airports();
+        airports.addAll(sys.getAirports(TEAM_DB));
+        for(Airport airport : airports) {
+            AIRPORT.add(airport.code());
+        }
     }
 
     private static Trips listOfTrips = new Trips();
@@ -47,20 +53,24 @@ public class Operation {
 
 
         // Valid input check
+
         if(depAIR == null || arrAIR == null || depTime == null ||
                 !AIRPORT.contains(depAIR) || !AIRPORT.contains(arrAIR)) {
             return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, id);
         }
 
+
         System.out.println("Process function gets called. Working ...");
         String query = searchHelper(depAIR, arrAIR, depTime);
-        String query_return = null;
+        String query_return = "[]";
         if(retTime != null) {
+            System.out.println("Return is not null");
             query_return = searchHelper(arrAIR, depAIR, retTime);
         }
+        System.out.println("Search finished. Starting parsing to JSON text ...");
 
         try {
-            return JSONRPC2Response.parse("{\"result\":" + "[" + query + query_return + "]"+ ",\"id\": " +id +",\"jsonrpc\":\"2.0\"}");
+            return JSONRPC2Response.parse("{\"result\":{\"depart\":" + query + ",\"return\":" + query_return + "},\"id\": \"" +id +"\",\"jsonrpc\":\"2.0\"}");
         } catch (JSONRPC2ParseException e) {
             e.printStackTrace();
         }
@@ -73,7 +83,6 @@ public class Operation {
         String flight_leg3;
 
         HashMap<Flight, Flights> search_two = new HashMap<Flight, Flights>();
-        HashMap<Flights, Flights> search_three = new HashMap<Flights, Flights>();
 
         listOfTrips.clear();
         tripID = 0;
@@ -88,17 +97,22 @@ public class Operation {
 
         //Third leg
         flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, depTime);
-        Flights search_three_1 = new Flights();
-        search_three_1.addAll(flight_leg3);
+        Flights search_three = new Flights();
+        search_three.addAll(flight_leg3);
         flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, getNextDay(depTime));
         Flights search_three_2 = new Flights();
         search_three_2.addAll(flight_leg3);
-        search_three_1.addAll(search_three_2);
+        search_three.addAll(search_three_2);
+        flight_leg3 = sys.getFlightsArriving(TEAM_DB, arrAIR, getNextDay(getNextDay(depTime)));
+        Flights search_three_3 = new Flights();
+        search_three_3.addAll(flight_leg3);
+        search_three.addAll(search_three_3);
 
         System.out.println("Leg 3 search completed. Working on next stage ...");
 
         if(search_one.isEmpty() || search_three.isEmpty()) {
-            return null;
+            System.out.println("No flight from depart airport OR no flight to arriving airport. ");
+            return "[]";
         }
 
         for(Flight f : search_one) {
@@ -108,8 +122,9 @@ public class Operation {
                     Trip li = new Trip();
                     li.setTripID(tripID);
                     li.add(f);
-                    listOfTrips.append(li); // Adding direct flight to the listOfTrips
+                    listOfTrips.append(li);
                     tripID ++;
+                    System.out.println("Trip added to results." + tripID);
                 } else {
                     // Search for the second leg and store the result temporarily in the HashMap search_two
                     String arrival = toTime(f.getmTimeArrival());
@@ -119,28 +134,32 @@ public class Operation {
                     search_second.addAll(sys.getFlightsDeparting(TEAM_DB, f.getmCodeArrival(), arrival));
                     search_second_2.addAll(sys.getFlightsDeparting(TEAM_DB, f.getmCodeArrival(), arr_next));
                     search_second.addAll(search_second_2);
-                    search_two.put(f, search_second);
+                    if(!search_second.isEmpty()) {
+                        search_two.put(f, search_second);
+                    }
                 }
             }
         }
+
+        System.out.println(search_two.isEmpty());
 
         System.out.println("Leg 2 search complete. Working on next stage ...");
 
         for(Flight f : search_two.keySet()) {
             Flights flights = search_two.get(f);
             for(Flight f_s : flights) {
-                if(f_s.isValid()) {
-                    if (f_s.getmCodeArrival().equals(arrAIR)
-                            && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
+                if(f_s.isValid() && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
+                    if (f_s.getmCodeArrival().equals(arrAIR)) {
                         // For 1 leg flight it will be added to the result listOfTrips when the second flight has the arrAIR code the same as the destination
                         Trip li = new Trip();
                         li.setTripID(tripID);
                         li.add(f);
                         li.add(f_s);
                         listOfTrips.append(li);
+                        System.out.println("Trip added to results." + tripID);
                         tripID ++;
                     } else {
-                        for(Flight f_t : search_three_1) {
+                        for(Flight f_t : search_three) {
                             // For 2 legs flight it will be added to the result of the f_s.ariAIR == f_t.depAIR and layover is reasonable
                             if(f_s.getmCodeArrival().equals(f_t.getmCodeDepart())
                                     && isWithinLayover(f_s.getmTimeArrival(), f_t.getmTimeDepart())) {
@@ -150,6 +169,7 @@ public class Operation {
                                 li.add(f_s);
                                 li.add(f_t);
                                 listOfTrips.append(li);
+                                System.out.println("Trip added to results." + tripID);
                                 tripID ++;
                             }
                         }
@@ -162,10 +182,13 @@ public class Operation {
 
 
         if(listOfTrips.isEmpty()) {
-            return null;
+            return "[]";
         }
 
-        return listOfTrips.toJSONText();
+        String q = listOfTrips.toJSONText();
+
+        //System.out.println(q);
+        return q;
     }
 
     // Test case for process: a simply method for receiving query from db
