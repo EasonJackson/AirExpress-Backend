@@ -2,6 +2,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +108,6 @@ public class Operation {
         Flights search_three_3 = new Flights();
         search_three_3.addAll(flight_leg3);
         search_three.addAll(search_three_3);
-
         System.out.println("Leg 3 search completed. Working on next stage ...");
 
         if(search_one.isEmpty() || search_three.isEmpty()) {
@@ -141,13 +141,14 @@ public class Operation {
             }
         }
 
-        System.out.println(search_two.isEmpty());
+        //System.out.println(search_two.isEmpty());
 
         System.out.println("Leg 2 search complete. Working on next stage ...");
 
         for(Flight f : search_two.keySet()) {
             Flights flights = search_two.get(f);
             for(Flight f_s : flights) {
+                //System.out.println(f.getmTimeArrival() + f_s.getmTimeDepart() + " " + isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart()));
                 if(f_s.isValid() && isWithinLayover(f.getmTimeArrival(), f_s.getmTimeDepart())) {
                     if (f_s.getmCodeArrival().equals(arrAIR)) {
                         // For 1 leg flight it will be added to the result listOfTrips when the second flight has the arrAIR code the same as the destination
@@ -279,17 +280,19 @@ public class Operation {
     }
 
     private static boolean isWithinLayover(String arr, String dep) {
-        Date depD = new Date(Integer.parseInt(dep.split("\\s")[0].trim()),
-                             Integer.parseInt(MonthSwitch.get(dep.split(" ")[1].trim())),
-                             Integer.parseInt(dep.split("\\s")[2].trim()),
-                             Integer.parseInt(dep.split("\\s")[3].trim().split(":")[0].trim()),
-                             Integer.parseInt(dep.split("\\s")[3].trim().split(":")[1].trim()));
-        Date arrD = new Date(Integer.parseInt(arr.split("\\s")[0].trim()),
-                             Integer.parseInt(MonthSwitch.get(arr.split("\\s")[1].trim())),
-                             Integer.parseInt(arr.split("\\s")[2].trim()),
-                             Integer.parseInt(dep.split("\\s")[3].trim().split(":")[0].trim()),
-                             Integer.parseInt(dep.split("\\s")[3].trim().split(":")[1].trim()));
-        double delay = (depD.getTime() - arrD.getTime()) / 3600000;
+        Calendar depC = Calendar.getInstance();
+        depC.set(Calendar.YEAR, Integer.parseInt(dep.split("\\s")[0].trim()) + 1900);
+        depC.set(Calendar.MONTH, Integer.parseInt(MonthSwitch.get(dep.split("\\s")[1].trim())));
+        depC.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dep.split("\\s")[2].trim()));
+        depC.set(Calendar.HOUR_OF_DAY, Integer.parseInt(dep.split("\\s")[3].trim().split(":")[0].trim()));
+        depC.set(Calendar.MINUTE, Integer.parseInt(dep.split("\\s")[3].trim().split(":")[1].trim()));
+        Calendar arrC = Calendar.getInstance();
+        arrC.set(Calendar.YEAR, Integer.parseInt(arr.split("\\s")[0].trim()) + 1900);
+        arrC.set(Calendar.MONTH, Integer.parseInt(MonthSwitch.get(arr.split("\\s")[1].trim())));
+        arrC.set(Calendar.DAY_OF_MONTH, Integer.parseInt(arr.split("\\s")[2].trim()));
+        arrC.set(Calendar.HOUR_OF_DAY, Integer.parseInt(arr.split("\\s")[3].trim().split(":")[0].trim()));
+        arrC.set(Calendar.MINUTE, Integer.parseInt(arr.split("\\s")[3].trim().split(":")[1].trim()));
+        double delay = (depC.getTimeInMillis() - arrC.getTimeInMillis()) / 3600000;
         if(delay > maxLayover || delay < minLayover) {
             return false;
         }

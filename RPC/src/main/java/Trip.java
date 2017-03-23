@@ -24,7 +24,7 @@ public class Trip extends Flights{
             result += "{\"id\": "                  + count                      + ",";
             result += "\"Airplane\":  \""          + fts.getmAirplane()         + "\",";
             result += "\"FlightTime\": \""         + fts.getmFlightTime()       + "\",";
-            result += "\"Number\": "               + fts.getmNumber()           + ",";
+            result += "\"Number\": \""             + fts.getmNumber()           + "\",";
             result += "\"CodeDepart\": \""         + fts.getmCodeDepart()       + "\",";
             result += "\"TimeDepart\": \""         + fts.getmTimeDepart()       + "\",";
             result += "\"CodeArrival\": \""        + fts.getmCodeArrival()      + "\",";
