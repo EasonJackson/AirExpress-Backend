@@ -33,7 +33,15 @@ public class ExampleServer {
 
             if(req.getMethod().equals("echo")) {
                 List params = (List) req.getParams();
+                Map<String, Object> map = (Map<String, Object>) req.getNamedParams();
                 Object input = params.get(0);
+                Set<String> input2 = map.keySet();
+                String s = "";
+                for(String st : input2) {
+                    s += ((String[]) map.get(st))[0] + " " + ((String[]) map.get(st))[1] + "\t";
+                }
+                System.out.println(s);
+                System.out.println("Test passed");
                 return new JSONRPC2Response(input, req.getID());
             } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
@@ -113,6 +121,29 @@ public class ExampleServer {
         }
     }
 
+    //ReserveTrip test case
+    public static class ReserveTripSimple implements RequestHandler {
+        public String[] handledRequests() {
+            return new String[] {
+                    "reserveTripSimple"
+            };
+        }
+
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            if (req.getMethod().equals("reserverTripSimple")) {
+                List params = (List) req.getParams();
+                Map<String, Object> map = (Map<String, Object>) req.getNamedParams();
+                Object typeOfSeats = params.get(0);
+                for (String st : map.keySet()) {
+                    System.out.println(st + " " + ((String[])map.get(st))[0] + " " + ((String[])map.get(st))[1]);
+                }
+                return new JSONRPC2Response(" ",req.getID());
+            } else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    }
+
     //ReserveTrip
     public static class ReserveTrip implements RequestHandler {
         public String[] handledRequests() {
@@ -123,10 +154,20 @@ public class ExampleServer {
 
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
             if (req.getMethod().equals("reserve")) {
-                List params = (List) req.getParams();
-                Trip reservation = (Trip) params.get(0);
-                reservation.addAll((List<Flight>) params.get(1));
-                String typeOfSeat = (String) params.get(2);
+                Map<String, Object> map = req.getNamedParams();
+                String typeOfSeat = "";
+                LinkedList<String> reservation = null;
+                try {
+                    for(String key : map.keySet()) {
+                        if(key.equals("typeOfSeat")) {
+                            typeOfSeat = (String) map.get("typeOfSeat");
+                        } else {
+                            reservation.add(key + " " + ((String[]) map.get(key))[0].trim() + " " + ((String[]) map.get(key))[1].trim());
+                        }
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
                 return Operation.reserveTrip(reservation, typeOfSeat, req.getID());
             } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
@@ -143,12 +184,20 @@ public class ExampleServer {
         dispatcher.register(new SearchFlight());
         dispatcher.register(new ReserveTrip());
         dispatcher.register(new SearchFlightTest());
+        dispatcher.register(new ReserveTripSimple());
 
         List echoParam = new LinkedList();
-        echoParam.add("Self testing query");
-        JSONRPC2Request req = new JSONRPC2Request("echo", echoParam, "req-id-01");
+        echoParam.add("Self testing query of List Param");
+        Map<String, Object> echoMap = new HashMap<String, Object>();
+        String[] s = {"Local", "Self tesing query of Named Param"};
+        echoMap.put("001", s);
+        echoMap.put("002", s);
+        JSONRPC2Request req = new JSONRPC2Request("echo", "req-id-01");
+        req.setPositionalParams(echoParam);
+        req.setNamedParams(echoMap);
         System.out.println("Request: \n" + req);
-        System.out.println("Test passed");
+        JSONRPC2Response resp = dispatcher.process(req, null);
+        System.out.println(resp);
 
         /*
         req = new JSONRPC2Request("getDate", "req-id-02");

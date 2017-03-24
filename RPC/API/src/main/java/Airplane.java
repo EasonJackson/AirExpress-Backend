@@ -58,6 +58,16 @@ public class Airplane {
 		mCoachSeats = coachSeats;
 	}
 
+	public boolean isValid () {
+		if (this.manufacturer() == null ||
+				this.model() == null ||
+				this.firstClassSeats() <= 0 ||
+				this.coachSeats() <= 0) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * set the manufacturer of the airplane
 	 * 

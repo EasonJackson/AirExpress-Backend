@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="FlightSys.jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/FlightSys_jar</output-path>
+    <root id="archive" name="FlightSys.jar">
+      <element id="module-output" name="API" />
+      <element id="module-output" name="RPC" />
+      <element id="module-output" name="SysTest" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/RPC/src/jsonrpc2-server-1.8.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31/jsonrpc2-base-1.31.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/RPC/src/jsonrpc2-client-1.12.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

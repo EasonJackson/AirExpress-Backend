@@ -2,10 +2,7 @@ import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 
 /**
@@ -33,12 +30,20 @@ public class Operation {
     }
 
     private static final HashSet<String> AIRPORT = new HashSet<String>();
-
     static {
         Airports airports = new Airports();
         airports.addAll(sys.getAirports(TEAM_DB));
         for(Airport airport : airports) {
             AIRPORT.add(airport.code());
+        }
+    }
+
+    private static final HashMap<String, Airplane> AIRPLANES = new HashMap<String, Airplane>();
+    static {
+        Airplanes airplanes = new Airplanes();
+        airplanes.addAll(sys.getAirplanes(TEAM_DB));
+        for(Airplane airplane : airplanes) {
+            AIRPLANES.put(airplane.model(), airplane);
         }
     }
 
@@ -212,12 +217,12 @@ public class Operation {
         }
     }
 
-    public static JSONRPC2Response reserveTrip(Trip reservation,
+    public static JSONRPC2Response reserveTrip(LinkedList<String> reservation,
                                                String typeOfSeat,
                                                Object id) {
 
         System.out.println("reserveTrip function gets called. Working ...");
-        String query = reserveHelper(reservation, typeOfSeat, id);
+        String query = reserveHelper(reservation, typeOfSeat);
 
         try {
             return JSONRPC2Response.parse("{\"result\":" + query + ",\"id\": " + id + ",\"jsonrpc\":\"2.0\"}");
@@ -227,37 +232,63 @@ public class Operation {
         return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, id);
     }
 
-    private static String reserveHelper(Trip reservation,
-                                        String typeOfSeat,
-                                        Object id) {
+    private static String reserveHelper(LinkedList<String> reservation,
+                                        String typeOfSeat) {
+        check.clear();
+        // Availability check
+        sys.lock(TEAM_DB);
+        for(String flightSt : reservation) {
+            String flightNumber = flightSt.split(" ")[0].trim();
+            String CodeDepart = flightSt.split(" ")[1].trim();
+            String TimeDepart = flightSt.split(" ")[2].trim();
 
-        for(Flight flight : reservation) {
+            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, CodeDepart, TimeDepart);
+            Flights temp = new Flights();
+            temp.addAll(xmlFlights);
+
+            for (Flight f : temp) {
+                String tmpFlightNumber = f.getmNumber();
+                if (tmpFlightNumber.equals(flightNumber)) {
+                    int seatsAva = typeOfSeat.equals("Coach") ? AIRPLANES.get(f.getmAirplane()).coachSeats() : AIRPLANES.get(f.getmAirplane()).firstClassSeats();
+                    if(getSeats(f, typeOfSeat) >= seatsAva) {
+                        sys.unlock(TEAM_DB);
+                        return "Reservation fails: flights not available.";
+                    }
+                    check.add(f);
+                    break;
+                }
+            }
+
+        }
+
+        // Reserve the flights
+        for(Flight f : check) {
             String xmlReservation = "<Flights>"
-                    + "<Flight number=\"" + flight.getmNumber() + "\" seating=\""
+                    + "<Flight number=\"" + f.getmNumber() + "\" seating=\""
                     + typeOfSeat + "\"/>" + "</Flights>";
             sys.lock(TEAM_DB);
             sys.buyTickets(TEAM_DB, xmlReservation);
             sys.unlock(TEAM_DB);
         }
 
-        System.out.println("Database updated. Checking the reservation information ...");
+            System.out.println("Database updated. Checking the reservation information ...");
 
         // Verify the operation worked
-        for(Flight flight : reservation) {
-            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeDepart());
-            check.clear();
-            check.addAll(xmlFlights);
+        for(Flight flight : check) {
             int seatsReservedStart = getSeats(flight, typeOfSeat);
-
             int seatsReservedEnd = seatsReservedStart;
 
-            for (Flight f : check) {
+            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeArrival());
+            Flights temp = new Flights();
+            temp.addAll(xmlFlights);
+
+            for (Flight f : temp) {
                 seatsReservedStart = getSeats(f, typeOfSeat);
                 // Find the flight number just updated
                 seatsReservedEnd = seatsReservedStart;
                 String tmpFlightNumber = f.getmNumber();
                 if (tmpFlightNumber.equals(flight.getmNumber())) {
-                    seatsReservedEnd = getSeats(flight, typeOfSeat);
+                    seatsReservedEnd = getSeats(f, typeOfSeat);
                     break;
                 }
             }
@@ -265,7 +296,7 @@ public class Operation {
             if (seatsReservedEnd == (seatsReservedStart + 1)) {
                 continue;
             } else {
-                return "Reservation Failed";
+                return "Reservation Failed: database updates error.";
             }
         }
 
@@ -301,11 +332,12 @@ public class Operation {
     }
 
     private static String getNextDay(String date) {
-        Date d = new Date(Integer.parseInt(date.split("_")[0].trim()),
-                          Integer.parseInt(date.split("_")[1].trim()),
-                          Integer.parseInt(date.split("_")[2].trim()));
-        Date nextDay = new Date(d.getTime() + 86400000);
-        return "" +  nextDay.getYear() + "_" + String.format("%02d",nextDay.getMonth()) + "_" + String.format("%02d", nextDay.getDate());
+        Calendar C = Calendar.getInstance();
+        C.set(Calendar.YEAR, Integer.parseInt(date.split("_")[0].trim()));
+        C.set(Calendar.MONTH, Integer.parseInt(date.split("_")[1].trim()));
+        C.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date.split("_")[2].trim()));
+        C.setTimeInMillis(C.getTimeInMillis() + 86400000);
+        return "" +  C.YEAR + "_" + String.format("%02d",C.MONTH) + "_" + String.format("%02d", C.DAY_OF_MONTH);
     }
 
     private static String toTime(String Time) {

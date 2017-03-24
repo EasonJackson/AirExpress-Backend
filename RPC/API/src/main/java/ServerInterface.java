@@ -72,7 +72,48 @@ public class ServerInterface {
 
 		return result.toString();
 	}
-	
+
+
+	public String getAirplanes (String team) {
+
+		URL url;
+		HttpURLConnection connection;
+		BufferedReader reader;
+		String line;
+		StringBuffer result = new StringBuffer();
+
+		try {
+			/**
+			 * Create an HTTP connection to the server for a GET
+			 */
+			url = new URL(mUrlBase + QueryFactory.getAirplanes(team));
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+
+			/**
+			 * If response code of SUCCESS read the XML string returned
+			 * line by line to build the full return string
+			 */
+			int responseCode = connection.getResponseCode();
+			if ((responseCode >= 200) && (responseCode <= 299)) {
+				InputStream inputStream = connection.getInputStream();
+				String encoding = connection.getContentEncoding();
+				encoding = (encoding == null ? "URF-8" : encoding);
+
+				reader = new BufferedReader(new InputStreamReader(inputStream));
+				while ((line = reader.readLine()) != null) {
+					result.append(line);
+				}
+				reader.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result.toString();
+	}
 	/**
 	 * Return XML string identifying flights departing specified airport on specified day
 	 * 

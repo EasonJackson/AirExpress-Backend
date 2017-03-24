@@ -274,7 +274,6 @@ public class JSONRPC2Request extends JSONRPC2Message {
 		setID(id);
 	}
 	
-	
 	/** 
 	 * Gets the name of the requested method.
 	 *
