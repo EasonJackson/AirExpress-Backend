@@ -83,10 +83,10 @@ public class Flight {
 				return false;
 			}
 			// verify departure time and arrival time are expected formats
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm z");
-			@SuppressWarnings("unused")
-			Date tmpDate = sdf.parse(mTimeDepart);
-			tmpDate = sdf.parse(mTimeArrival);
+			//SimpleDateFormat sdf = new SimpleDateFormat("yyyy MMM dd HH:mm z");
+			//@SuppressWarnings("unused")
+			//Date tmpDate = sdf.parse(mTimeDepart);
+			//tmpDate = sdf.parse(mTimeArrival);
 			
 			/**
 			 * Need to match:

@@ -91,6 +91,7 @@ public class Operation {
 
         //First leg
         flight_leg1 = sys.getFlightsDeparting(TEAM_DB, depAIR, depTime);
+        System.out.println(flight_leg1);
         Flights search_one = new Flights();
         search_one.addAll(flight_leg1);
 
