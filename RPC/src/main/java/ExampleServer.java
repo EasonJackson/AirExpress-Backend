@@ -165,7 +165,7 @@ public class ExampleServer {
                             reservation.add(key + " " + ((String[]) map.get(key))[0].trim() + " " + ((String[]) map.get(key))[1].trim());
                         }
                     }
-                } catch (NullPointerException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return Operation.reserveTrip(reservation, typeOfSeat, req.getID());

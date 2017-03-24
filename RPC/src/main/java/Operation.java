@@ -11,8 +11,8 @@ import java.util.*;
 public class Operation {
     private static final ServerInterface sys = new ServerInterface();
     private static final String TEAM_DB = "WickedSmaht";
-    private static final double minLayover = 0.5;
-    private static final double maxLayover = 4;
+    private static final double minLayover = 0.5 * 3600000;
+    private static final double maxLayover = 4 * 3600000;
     private static final HashMap<String, String> MonthSwitch = new HashMap<String, String>();
     static {
         MonthSwitch.put("January", "01");
@@ -56,8 +56,6 @@ public class Operation {
                                            String depTime,
                                            String retTime,
                                            Object id) {
-
-
         // Valid input check
 
         if(depAIR == null || arrAIR == null || depTime == null ||
@@ -96,7 +94,6 @@ public class Operation {
 
         //First leg
         flight_leg1 = sys.getFlightsDeparting(TEAM_DB, depAIR, depTime);
-        System.out.println(flight_leg1);
         Flights search_one = new Flights();
         search_one.addAll(flight_leg1);
 
@@ -187,14 +184,12 @@ public class Operation {
 
         System.out.println("Search completed. Returning results ...");
 
-
         if(listOfTrips.isEmpty()) {
             return "[]";
         }
 
         String q = listOfTrips.toJSONText();
 
-        //System.out.println(q);
         return q;
     }
 
@@ -266,7 +261,6 @@ public class Operation {
             String xmlReservation = "<Flights>"
                     + "<Flight number=\"" + f.getmNumber() + "\" seating=\""
                     + typeOfSeat + "\"/>" + "</Flights>";
-            sys.lock(TEAM_DB);
             sys.buyTickets(TEAM_DB, xmlReservation);
             sys.unlock(TEAM_DB);
         }
@@ -324,7 +318,7 @@ public class Operation {
         arrC.set(Calendar.DAY_OF_MONTH, Integer.parseInt(arr.split("\\s")[2].trim()));
         arrC.set(Calendar.HOUR_OF_DAY, Integer.parseInt(arr.split("\\s")[3].trim().split(":")[0].trim()));
         arrC.set(Calendar.MINUTE, Integer.parseInt(arr.split("\\s")[3].trim().split(":")[1].trim()));
-        double delay = (depC.getTimeInMillis() - arrC.getTimeInMillis()) / 3600000;
+        double delay = depC.getTimeInMillis() - arrC.getTimeInMillis();
         if(delay > maxLayover || delay < minLayover) {
             return false;
         }
