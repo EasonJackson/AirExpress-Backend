@@ -272,7 +272,7 @@ public class Operation {
             int seatsReservedStart = getSeats(flight, typeOfSeat);
             int seatsReservedEnd = seatsReservedStart;
 
-            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeArrival());
+            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeDepart());
             Flights temp = new Flights();
             temp.addAll(xmlFlights);
 
