@@ -15,18 +15,18 @@ public class Operation {
     private static final double maxLayover = 4 * 3600000;
     private static final HashMap<String, String> MonthSwitch = new HashMap<String, String>();
     static {
-        MonthSwitch.put("January", "01");
-        MonthSwitch.put("February", "02");
-        MonthSwitch.put("March", "03");
-        MonthSwitch.put("April", "04");
+        MonthSwitch.put("Jan", "01");
+        MonthSwitch.put("Feb", "02");
+        MonthSwitch.put("Mar", "03");
+        MonthSwitch.put("Apr", "04");
         MonthSwitch.put("May", "05");
-        MonthSwitch.put("June", "06");
-        MonthSwitch.put("July", "07");
-        MonthSwitch.put("August", "08");
-        MonthSwitch.put("September", "09");
-        MonthSwitch.put("October", "10");
-        MonthSwitch.put("November", "11");
-        MonthSwitch.put("December", "12");
+        MonthSwitch.put("Jun", "06");
+        MonthSwitch.put("Jul", "07");
+        MonthSwitch.put("Aug", "08");
+        MonthSwitch.put("Sep", "09");
+        MonthSwitch.put("Oct", "10");
+        MonthSwitch.put("Nov", "11");
+        MonthSwitch.put("Dec", "12");
     }
 
     private static final HashSet<String> AIRPORT = new HashSet<String>();
