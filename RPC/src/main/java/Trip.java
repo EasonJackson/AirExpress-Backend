@@ -23,15 +23,15 @@ public class Trip extends Flights{
             Flight fts = it.next();
             result += "{\"id\": "                  + count                      + ",";
             result += "\"Airplane\":  \""          + fts.getmAirplane()         + "\",";
-            result += "\"FlightTime\": \""         + fts.getmFlightTime()       + "\",";
+            result += "\"FlightTime\": "           + fts.getmFlightTime()       + ",";
             result += "\"Number\": \""             + fts.getmNumber()           + "\",";
             result += "\"CodeDepart\": \""         + fts.getmCodeDepart()       + "\",";
             result += "\"TimeDepart\": \""         + fts.getmTimeDepart()       + "\",";
             result += "\"CodeArrival\": \""        + fts.getmCodeArrival()      + "\",";
             result += "\"TimeArrival\": \""        + fts.getmTimeArrival()      + "\",";
-            result += "\"PriceFirstclass\": \""    + fts.getmPriceFirstclass()  + "\",";
+            result += "\"PriceFirstclass\": "      + fts.getmPriceFirstclass().substring(1)  + ",";
             result += "\"SeatsFirstclass\": "      + fts.getmSeatsFirstclass()  + ",";
-            result += "\"PriceCoach\": \""         + fts.getmPriceCoach()       + "\",";
+            result += "\"PriceCoach\": "           + fts.getmPriceCoach().substring(1)            + ",";
             result += "\"SeatsCoach\": "           + fts.getmSeatsCoach()       + "}";
             if(it.hasNext()) {
                 result += ",";
