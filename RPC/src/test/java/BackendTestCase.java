@@ -17,7 +17,6 @@ public class BackendTestCase {
         params.add((Object) "2017_05_10");
         params.add(null);
 
-        JSONRPC2Response resp = client.searchFlight("searchFlight", params);
-        System.out.print(resp.getResult());
+
     }
 }

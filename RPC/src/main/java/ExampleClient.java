@@ -6,6 +6,7 @@ import com.thetransactioncompany.jsonrpc2.client.JSONRPC2SessionException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,21 +25,23 @@ public class ExampleClient {
         }
 
         session = new JSONRPC2Session(serverURL);
-        session.getOptions().setConnectTimeout(5000);
-        session.getOptions().setReadTimeout(1000);
+        //session.getOptions().setConnectTimeout(20000);
+        session.getOptions().setReadTimeout(15000);
     }
 
-    public JSONRPC2Response searchFlight(String method, List<Object> params) {
+    public JSONRPC2Response searchFlight(String method, String[] params) {
         int requestID = genRequestID();
-        JSONRPC2Request req = new JSONRPC2Request(method, params, requestID);
+        List<Object> Lparams = Arrays.asList((Object[]) params);
+        JSONRPC2Request req = new JSONRPC2Request(method, Lparams, requestID);
         System.out.println(req);
 
         return sendRequest(req);
     }
 
-    public JSONRPC2Response reserveFlight(String method, List<Object> params) {
+    public JSONRPC2Response reserveFlight(String method, Object[] params) {
         int requestID = genRequestID();
-        JSONRPC2Request req = new JSONRPC2Request(method, params, requestID);
+        List<Object> Lparams = Arrays.asList((Object[]) params);
+        JSONRPC2Request req = new JSONRPC2Request(method, Lparams, requestID);
         System.out.println(req);
 
         return sendRequest(req);

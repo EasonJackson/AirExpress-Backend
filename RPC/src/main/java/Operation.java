@@ -67,7 +67,7 @@ public class Operation {
         System.out.println("Process function gets called. Working ...");
         String query = searchHelper(depAIR, arrAIR, depTime);
         String query_return = "[]";
-        if(retTime != null) {
+        if(retTime != null && !retTime.equals("")) {
             System.out.println("Return is not null");
             query_return = searchHelper(arrAIR, depAIR, retTime);
         }
