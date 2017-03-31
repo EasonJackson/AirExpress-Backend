@@ -8,15 +8,15 @@ import java.util.List;
  */
 public class BackendTestCase {
 
-    public static void main(String[] args) {
-
-        ExampleClient client = new ExampleClient();
-        List<Object> params = new ArrayList<Object>();
-        params.add((Object) "BOS");
-        params.add((Object) "LGA");
-        params.add((Object) "2017_05_10");
-        params.add(null);
-
-
-    }
+//    public static void main(String[] args) {
+//
+//        ExampleClient client = new ExampleClient();
+//        List<Object> params = new ArrayList<Object>();
+//        params.add((Object) "BOS");
+//        params.add((Object) "LGA");
+//        params.add((Object) "2017_05_10");
+//        params.add(null);
+//
+//
+//    }
 }
