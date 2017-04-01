@@ -73,6 +73,22 @@ public class ExampleServer {
         }
     }
 
+    public static class GetAirports implements  RequestHandler {
+        public String[] handledRequests() {
+            return new String[] {
+                    "getAirports"
+            };
+        }
+
+        public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
+            if(req.getMethod().equals("getAirports")) {
+                return Operation.getAirports(req.getID());
+            } else {
+                return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
+            }
+        }
+    }
+
     //Test db query for search method
     public static class SearchFlightTest implements RequestHandler {
         public String[] handledRequests() {
@@ -185,6 +201,7 @@ public class ExampleServer {
         dispatcher.register(new ReserveTrip());
         dispatcher.register(new SearchFlightTest());
         dispatcher.register(new ReserveTripSimple());
+        dispatcher.register(new GetAirports());
 
         List echoParam = new LinkedList();
         echoParam.add("Self testing query of List Param");
@@ -263,6 +280,7 @@ public class ExampleServer {
             //Send back the response
             t.getResponseHeaders().set("Content-Type", "text/plain");
             t.sendResponseHeaders(200, jsonResp.toString().length());
+
             OutputStream os = t.getResponseBody();
             os.write(jsonResp.toString().getBytes());
             os.close();

@@ -47,10 +47,19 @@ public class ExampleClient {
         return sendRequest(req);
     }
 
+    public JSONRPC2Response getAirports(String method) {
+        int requestID = genRequestID();
+        JSONRPC2Request req = new JSONRPC2Request(method, requestID);
+        System.out.println(req);
+
+        return sendRequest(req);
+    }
+
     public static JSONRPC2Response sendRequest(JSONRPC2Request req) {
         JSONRPC2Response resp = null;
         try {
             resp = session.send(req);
+            System.out.println(resp);
         } catch (JSONRPC2SessionException e) {
             System.err.println(e.getMessage());
         }

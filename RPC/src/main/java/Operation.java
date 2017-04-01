@@ -29,13 +29,35 @@ public class Operation {
         MonthSwitch.put("Dec", "12");
     }
 
-    private static final HashSet<String> AIRPORT = new HashSet<String>();
+    private static final Airports AIRPORTS;
+    private static final HashSet<String> AIRPORTS_CODE = new HashSet<String>();
     static {
-        Airports airports = new Airports();
-        airports.addAll(sys.getAirports(TEAM_DB));
-        for(Airport airport : airports) {
-            AIRPORT.add(airport.code());
+        AIRPORTS = new Airports();
+        AIRPORTS.addAll(sys.getAirports(TEAM_DB));
+        for(Airport airport : AIRPORTS) {
+            AIRPORTS_CODE.add(airport.code());
         }
+    }
+
+    private static final String AIRPORTS_QUERY;
+    static {
+        String query = "[";
+        Iterator<Airport> iter = AIRPORTS.iterator();
+        while(iter.hasNext()) {
+            Airport airport = iter.next();
+            if(airport.code().equals("SJC")) {
+                airport.name("Mineta San Jose International");
+            }
+            query += "{ \"Name\": " + "\"" + airport.name() + "\"," +
+                    "\"Code\": " + "\"" + airport.code() + "\"," +
+                    "\"Latitude\": " + airport.latitude() + "," +
+                    "\"Longitude\": " + airport.longitude() + "}";
+            if(iter.hasNext()) {
+                query += ",";
+            }
+        }
+        query += "]";
+        AIRPORTS_QUERY = query;
     }
 
     private static final HashMap<String, Airplane> AIRPLANES = new HashMap<String, Airplane>();
@@ -51,6 +73,16 @@ public class Operation {
     private static Flights check = new Flights();
     private static int tripID;
 
+
+    public static JSONRPC2Response getAirports(Object id) {
+        try {
+            return JSONRPC2Response.parse("{\"result\": " + AIRPORTS_QUERY + ",\"id\": \"" + id + "\",\"jsonrpc\":\"2.0\"}");
+        } catch (JSONRPC2ParseException e) {
+            e.printStackTrace();
+        }
+        return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, id);
+    }
+
     public static JSONRPC2Response process(String depAIR,
                                            String arrAIR,
                                            String depTime,
@@ -59,7 +91,7 @@ public class Operation {
         // Valid input check
 
         if(depAIR == null || arrAIR == null || depTime == null ||
-                !AIRPORT.contains(depAIR) || !AIRPORT.contains(arrAIR)) {
+                !AIRPORTS_CODE.contains(depAIR) || !AIRPORTS_CODE.contains(arrAIR)) {
             return new JSONRPC2Response(JSONRPC2Error.INVALID_PARAMS, id);
         }
 
