@@ -1,3 +1,6 @@
+import com.google.maps.GeoApiContext;
+import com.google.maps.TimeZoneApi;
+import com.google.maps.model.LatLng;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Error;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2ParseException;
 import com.thetransactioncompany.jsonrpc2.JSONRPC2Response;
@@ -39,19 +42,34 @@ public class Operation {
         }
     }
 
+
     private static final String AIRPORTS_QUERY;
     static {
+        GeoApiContext ctx = new GeoApiContext().setApiKey("AIzaSyAmGNL2f_7a172eqp4YPnmTU-eqQFzWcNk")
+                .setQueryRateLimit(3);
+        TimeZone tz;
+        LatLng location;
         String query = "[";
         Iterator<Airport> iter = AIRPORTS.iterator();
         while(iter.hasNext()) {
             Airport airport = iter.next();
+            long offset = 0;
+            location = new LatLng(airport.latitude(), airport.longitude());
+            try {
+                tz = TimeZoneApi.getTimeZone(ctx, location).await();
+                offset = tz.getRawOffset() + tz.getDSTSavings();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             if(airport.code().equals("SJC")) {
                 airport.name("Mineta San Jose International");
             }
             query += "{ \"Name\": " + "\"" + airport.name() + "\"," +
                     "\"Code\": " + "\"" + airport.code() + "\"," +
                     "\"Latitude\": " + airport.latitude() + "," +
-                    "\"Longitude\": " + airport.longitude() + "}";
+                    "\"Longitude\": " + airport.longitude() + "," +
+                    "\"Offset\": "+ offset + "}";
             if(iter.hasNext()) {
                 query += ",";
             }
