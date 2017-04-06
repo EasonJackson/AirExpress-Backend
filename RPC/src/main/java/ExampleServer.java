@@ -146,14 +146,11 @@ public class ExampleServer {
         }
 
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            if (req.getMethod().equals("reserverTripSimple")) {
+            if (req.getMethod().equals("reserveTripSimple")) {
                 List params = (List) req.getParams();
-                Map<String, Object> map = (Map<String, Object>) req.getNamedParams();
-                Object typeOfSeats = params.get(0);
-                for (String st : map.keySet()) {
-                    System.out.println(st + " " + ((String[])map.get(st))[0] + " " + ((String[])map.get(st))[1]);
-                }
-                return new JSONRPC2Response(" ",req.getID());
+                String typeOfSeats = (String) params.get(0);
+                String reservation = (String) params.get(1);
+                return Operation.reserveTripSimple(reservation, typeOfSeats, req.getID());
             } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());
             }
@@ -169,21 +166,11 @@ public class ExampleServer {
         }
 
         public JSONRPC2Response process(JSONRPC2Request req, MessageContext ctx) {
-            if (req.getMethod().equals("reserve")) {
-                Map<String, Object> map = req.getNamedParams();
-                String typeOfSeat = "";
-                LinkedList<String> reservation = null;
-                try {
-                    for(String key : map.keySet()) {
-                        if(key.equals("typeOfSeat")) {
-                            typeOfSeat = (String) map.get("typeOfSeat");
-                        } else {
-                            reservation.add(key + " " + ((String[]) map.get(key))[0].trim() + " " + ((String[]) map.get(key))[1].trim());
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            if (req.getMethod().equals("reserveTrip")) {
+                List<Object> params = (List) req.getParams();
+                String typeOfSeat = (String) params.get(0);
+                String reservation = (String)params.get(1);
+
                 return Operation.reserveTrip(reservation, typeOfSeat, req.getID());
             } else {
                 return new JSONRPC2Response(JSONRPC2Error.METHOD_NOT_FOUND, req.getID());

@@ -49,4 +49,8 @@ public class QueryFactory {
 		return query;
 	}
 
+	public static String reset (String team) {
+		return "team=" + team + "&action=resetDB";
+	}
+
 }

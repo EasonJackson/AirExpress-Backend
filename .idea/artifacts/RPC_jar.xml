@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="RPC:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/RPC_jar</output-path>
+    <root id="archive" name="RPC.jar">
+      <element id="module-output" name="RPC" />
+      <element id="module-output" name="API" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/joda-time/joda-time/2.9.7/joda-time-2.9.7.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/RPC/src/jsonrpc2-client-1.12.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/RPC/src/jsonrpc2-server-1.8.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/RPC/src/JsonRpc2-Base-1.31/jsonrpc2-base-1.31.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

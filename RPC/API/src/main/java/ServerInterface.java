@@ -381,4 +381,45 @@ public class ServerInterface {
 			return false;
 		}
 	}
+
+	public boolean resetDB(String team) {
+		URL url;
+		HttpURLConnection connection;
+
+		try {
+			url = new URL(mUrlBase);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setRequestProperty("User-Agent", team);
+			connection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+			String params = QueryFactory.reset(team);
+
+			connection.setDoOutput(true);
+			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+			writer.writeBytes(params);
+			writer.flush();
+			writer.close();
+
+			int responseCode = connection.getResponseCode();
+			System.out.println("\nSending 'GET' to reset database");
+			System.out.println(("\nResponse Code : " + responseCode));
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line;
+			StringBuffer response = new StringBuffer();
+
+			while ((line = in.readLine()) != null) {
+				response.append(line);
+			}
+			in.close();
+
+			System.out.println(response.toString());
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			return false;
+		}
+		return true;
+	}
 }

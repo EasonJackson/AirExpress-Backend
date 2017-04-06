@@ -42,14 +42,36 @@ public class Operation {
         }
     }
 
-
-    private static final String AIRPORTS_QUERY;
+    private static final HashMap<String, Airplane> AIRPLANES = new HashMap<String, Airplane>();
     static {
+        Airplanes airplanes = new Airplanes();
+        airplanes.addAll(sys.getAirplanes(TEAM_DB));
+        for(Airplane airplane : airplanes) {
+            AIRPLANES.put(airplane.model(), airplane);
+        }
+    }
+
+    private static String AIRPORTS_QUERY;
+    private static Trips listOfTrips = new Trips();
+    private static Flights check = new Flights();
+    private static int tripID;
+
+    private Operation() {}
+
+    // getAirports
+    public static JSONRPC2Response getAirports(Object id) {
+        if(AIRPORTS_QUERY != null) {
+            try {
+                return JSONRPC2Response.parse("{\"result\": " + AIRPORTS_QUERY + ",\"id\": \"" + id + "\",\"jsonrpc\":\"2.0\"}");
+            } catch (JSONRPC2ParseException e) {
+                e.printStackTrace();
+            }
+        }
         GeoApiContext ctx = new GeoApiContext().setApiKey("AIzaSyAmGNL2f_7a172eqp4YPnmTU-eqQFzWcNk")
                 .setQueryRateLimit(3);
         TimeZone tz;
         LatLng location;
-        String query = "[";
+        AIRPORTS_QUERY = "[";
         Iterator<Airport> iter = AIRPORTS.iterator();
         while(iter.hasNext()) {
             Airport airport = iter.next();
@@ -65,34 +87,17 @@ public class Operation {
             if(airport.code().equals("SJC")) {
                 airport.name("Mineta San Jose International");
             }
-            query += "{ \"Name\": " + "\"" + airport.name() + "\"," +
+            AIRPORTS_QUERY += "{ \"Name\": " + "\"" + airport.name() + "\"," +
                     "\"Code\": " + "\"" + airport.code() + "\"," +
                     "\"Latitude\": " + airport.latitude() + "," +
                     "\"Longitude\": " + airport.longitude() + "," +
                     "\"Offset\": "+ offset + "}";
             if(iter.hasNext()) {
-                query += ",";
+                AIRPORTS_QUERY += ",";
             }
         }
-        query += "]";
-        AIRPORTS_QUERY = query;
-    }
+        AIRPORTS_QUERY += "]";
 
-    private static final HashMap<String, Airplane> AIRPLANES = new HashMap<String, Airplane>();
-    static {
-        Airplanes airplanes = new Airplanes();
-        airplanes.addAll(sys.getAirplanes(TEAM_DB));
-        for(Airplane airplane : airplanes) {
-            AIRPLANES.put(airplane.model(), airplane);
-        }
-    }
-
-    private static Trips listOfTrips = new Trips();
-    private static Flights check = new Flights();
-    private static int tripID;
-
-
-    public static JSONRPC2Response getAirports(Object id) {
         try {
             return JSONRPC2Response.parse("{\"result\": " + AIRPORTS_QUERY + ",\"id\": \"" + id + "\",\"jsonrpc\":\"2.0\"}");
         } catch (JSONRPC2ParseException e) {
@@ -101,6 +106,7 @@ public class Operation {
         return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, id);
     }
 
+    // SearchFlight
     public static JSONRPC2Response process(String depAIR,
                                            String arrAIR,
                                            String depTime,
@@ -243,7 +249,7 @@ public class Operation {
         return q;
     }
 
-    // Test case for process: a simply method for receiving query from db
+    // Test case for searchFlight: a simply method for receiving query from db
     public static JSONRPC2Response processSimple(String depAIR,
                                                  String arrAIR,
                                                  String depTime,
@@ -255,29 +261,48 @@ public class Operation {
         Trips t = new Trips();
         t.add(f);
         try {
-            return JSONRPC2Response.parse("{\"result\":" + t.toJSONText() + ",\"id\": " +id +",\"jsonrpc\":\"2.0\"}");
+            return JSONRPC2Response.parse("{\"result\":" + t.toJSONText() + ",\"id\": \"" +id +"\",\"jsonrpc\":\"2.0\"}");
         } catch (JSONRPC2ParseException e) {
             e.printStackTrace();
             return new JSONRPC2Response(t.toJSONText(), id);
         }
     }
 
-    public static JSONRPC2Response reserveTrip(LinkedList<String> reservation,
+    // reserveTripTest
+    public static JSONRPC2Response reserveTripSimple(String reservation,
+                                                     String typeOfSeat,
+                                                     Object id) {
+        List<String> reserve;
+        reserve = Arrays.asList(reservation.split(","));
+        String query = typeOfSeat;
+        for(String trip : reserve) {
+            query += "Flight #" + trip.split(" ")[0] + ":";
+            query += trip.split(" ")[1] + " + ";
+            query += trip.split(" ")[2];
+        }
+        return new JSONRPC2Response(query, id);
+    }
+
+    // reserveTrip
+    public static JSONRPC2Response reserveTrip(String reservation,
                                                String typeOfSeat,
                                                Object id) {
 
         System.out.println("reserveTrip function gets called. Working ...");
-        String query = reserveHelper(reservation, typeOfSeat);
+        List<String> reserve;
+        reserve = Arrays.asList(reservation.split(","));
+        String query = reserveHelper(reserve, typeOfSeat);
+        System.out.println("{\"result\":" + query + ",\"id\": \"" + id + "\",\"jsonrpc\":\"2.0\"}");
 
         try {
-            return JSONRPC2Response.parse("{\"result\":" + query + ",\"id\": " + id + ",\"jsonrpc\":\"2.0\"}");
+            return JSONRPC2Response.parse("{\"result\": \"" + query + "\",\"id\": \"" + id + "\",\"jsonrpc\":\"2.0\"}");
         } catch (JSONRPC2ParseException e) {
             e.printStackTrace();
         }
         return new JSONRPC2Response(JSONRPC2Error.PARSE_ERROR, id);
     }
 
-    private static String reserveHelper(LinkedList<String> reservation,
+    private static String reserveHelper(List<String> reservation,
                                         String typeOfSeat) {
         check.clear();
         // Availability check
@@ -297,13 +322,12 @@ public class Operation {
                     int seatsAva = typeOfSeat.equals("Coach") ? AIRPLANES.get(f.getmAirplane()).coachSeats() : AIRPLANES.get(f.getmAirplane()).firstClassSeats();
                     if(getSeats(f, typeOfSeat) >= seatsAva) {
                         sys.unlock(TEAM_DB);
-                        return "Reservation fails: flights not available.";
+                        return "Reservation fails: Seats not available.";
                     }
                     check.add(f);
                     break;
                 }
             }
-
         }
 
         // Reserve the flights
@@ -312,42 +336,43 @@ public class Operation {
                     + "<Flight number=\"" + f.getmNumber() + "\" seating=\""
                     + typeOfSeat + "\"/>" + "</Flights>";
             sys.buyTickets(TEAM_DB, xmlReservation);
-            sys.unlock(TEAM_DB);
         }
-
+        sys.unlock(TEAM_DB);
             System.out.println("Database updated. Checking the reservation information ...");
 
         // Verify the operation worked
+        List<Integer> seatsReservedEnd = new ArrayList<Integer>();
         for(Flight flight : check) {
             int seatsReservedStart = getSeats(flight, typeOfSeat);
-            int seatsReservedEnd = seatsReservedStart;
+            //int seatsReservedEnd = seatsReservedStart;
 
-            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), flight.getmTimeDepart());
+            String xmlFlights = sys.getFlightsDeparting(TEAM_DB, flight.getmCodeDepart(), toTime(flight.getmTimeDepart()));
             Flights temp = new Flights();
             temp.addAll(xmlFlights);
 
             for (Flight f : temp) {
-                seatsReservedStart = getSeats(f, typeOfSeat);
-                // Find the flight number just updated
-                seatsReservedEnd = seatsReservedStart;
                 String tmpFlightNumber = f.getmNumber();
                 if (tmpFlightNumber.equals(flight.getmNumber())) {
-                    seatsReservedEnd = getSeats(f, typeOfSeat);
+                    seatsReservedEnd.add(getSeats(f, typeOfSeat));
                     break;
                 }
             }
 
-            if (seatsReservedEnd == (seatsReservedStart + 1)) {
+            if (seatsReservedEnd.get(seatsReservedEnd.size() - 1) == (seatsReservedStart + 1)) {
                 continue;
             } else {
                 return "Reservation Failed: database updates error.";
             }
         }
-
+        for(int i = 0; i < check.size(); i++) {
+            System.out.println(check.get(i).getmNumber() + " " + typeOfSeat + "Started at:" + check.get(i).getmSeatsCoach() + "Ended with" + seatsReservedEnd.get(i));
+        }
         System.out.println("Reservation confirmed. All set.");
         return "Seat Reserved Successfully";
     }
 
+
+    //
     private static int getSeats(Flight flight, String typeOfSeat) {
         if(typeOfSeat.equals("Coach")) {
             return flight.getmSeatsCoach();
