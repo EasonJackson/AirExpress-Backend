@@ -38,7 +38,7 @@ public class ExampleClient {
         return sendRequest(req);
     }
 
-    public JSONRPC2Response reserveFlight(String method, Object[] params) {
+    public JSONRPC2Response reserveTrip(String method, Object[] params) {
         int requestID = genRequestID();
         List<Object> Lparams = Arrays.asList((Object[]) params);
         JSONRPC2Request req = new JSONRPC2Request(method, Lparams, requestID);
