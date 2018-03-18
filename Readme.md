@@ -9,6 +9,7 @@ AirExpress flight search and reservation system is a **RESTful** web application
 The system is built with several functional sections. It includes a web-server implemeted with Node, which takes responsibility for directing HTTP requirements from front-end clients. It also includes a backend Java server, which takes responsibility for the searching and reserving business logics. The system is supported by a SQL database, which stores all the flight infomation. The message flow between the web-server and backend is done throught a remote procedure call, RPC.
 
 Web-server: https://github.com/EasonJackson/AirExpress-Frontend
+
 Backend-server: https://github.com/EasonJackson/AirExpress-Backend
 
 ## Prerequisites
@@ -29,16 +30,21 @@ $ ./bin/www
 The server is by default running on ```localhost:3000```
 
 On successful starting, the web-server will start querying airport geometry information with Google Map API. Once done it will show:
+
 ```
 Airport loaded.
 ```
+
 A Java PRC client instance is automatically instatiated with the web-server.
 
 **To start a backend server**:
+
 It makes easier to use an IDE to compile the source code, and then start the ```ExampleServer``` under path ```./RPC/src/main/java/```
+
 The backend server is by default running on ```localhost:8080```
 
 On successful starting, the backend server will call an echo method to conduct a self-test.
+
 The following message will be displayed once the echo method is finished:
 
 ```
